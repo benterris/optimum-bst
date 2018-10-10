@@ -4,7 +4,6 @@ import numpy as np
 pp = pprint.PrettyPrinter(indent=4)
 
 alpha = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-# careful with the index (0 is beta1)
 beta = [0, 10, 0, 0, 0, 0, 0, 0, 10, 0]
 n = len(beta)
 
