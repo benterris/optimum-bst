@@ -1,16 +1,42 @@
+"""
+This program computes an optimum binary search tree, implementing
+the idea from http://www.inrg.csie.ntu.edu.tw/algorithm2014/presentation/Knuth71.pdf
+
+Here, we included in this implementation the `alpha` part of the article,
+which means we take in account the frequencies of words appearing between selected words.
+
+This can be used without the `alpha` frequencies (providing only the `beta` ones to the main function),
+or optionally we can provide a list with `alpha` frequencies. In this case the length of the `alpha` list
+must be greater than the `beta` list by one unit.
+"""
+
 import pprint
 import numpy as np
 
-pp = pprint.PrettyPrinter(indent=4)
 
-alpha = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-beta = [0, 10, 0, 0, 0, 0, 0, 0, 10, 0]
-n = len(beta)
+def main(betaList, alphaList=None):
+    """
+    From a list of frequencies, find the related optimal tree
+    We expect a list of frequencies for the words (a list of beta values),
+    but one can also optionally provide a list of alpha values (see above).
+
+    :param beta: a list of frequencies for all the words to be put in the tree
+    :param alpha: optional list of frequencies for all the words inbetween the latter ones 
+    """
+
+    alpha = np.zeros(
+        len(betaList) + 1) if alphaList == None else np.array(alphaList)
+    beta = np.array(betaList)
+
+    R = findBestRoots(alpha, beta)
+
+    return parentsFromRoots(R)
 
 
 def computeWeight(alpha, beta):
     """
     Compute W, the total weight matrix
+
     :param alpha: list of the weight of the alpha parameters
     :param beta: list of the weight of the beta parameters
     """
@@ -28,7 +54,10 @@ def computeWeight(alpha, beta):
 
 def findBestRoots(alpha, beta):
     """
-    Compute R and W, respectively the roots and the weighted paths matrix
+    Compute R and P, respectively the roots and the weighted paths matrix
+
+    :return R: The roots matrix, containing for R[i, j] the index of the root of the optimal
+                subtree built from the words A_i, A_i+1 ... A_j
     """
     # Pre compute all the sums
     W = computeWeight(alpha, beta)
@@ -66,26 +95,24 @@ def findBestRoots(alpha, beta):
             R[i, j] = minIndex
             P[i, j] = minWeight + W[i, j]
 
-            # print('-----------')
-            # print(groupLen, i, j)
-            # print(minIndex, minWeight)
-            # pp.pprint(R)
-            # pp.pprint(P)
-            # input()
-
-    return P, R, W
+    return R
 
 
 def parentsFromRoots(R):
     """
     Build the parents array from the roots matrix
     For each node, it gives the index of its parent in the optimal
-    subtree, with -1 designing the root of the tree
+    subtree, with the root of the subtree being its own parent
 
     :param R: the matrix of the roots of the optimal subtrees
     """
-    parents = [-1]*len(R)
+    parents = [-1] * len(R)
     buildSubTree(R, parents, -1, 0, len(R) - 1)
+
+    # Locate the root and replace it with its own index
+    generalRoot = parents.index(-1)
+    parents[generalRoot] = generalRoot
+
     return parents
 
 
@@ -101,20 +128,23 @@ def buildSubTree(R, parents, calledFrom, i, j):
     """
     parents[R[i, j]] = calledFrom
     if not (i <= R[i, j] and R[i, j] <= j):
-        raise BaseException("problem")
+        raise BaseException("The root is out of the bounds of the subtree")
     if i < j:
         if i <= R[i, j] - 1:
+            # In case we indeed have a left subtree
             buildSubTree(R, parents, R[i, j], i, R[i, j] - 1)
         if R[i, j] + 1 <= j:
+            # In case we indeed have a right subtree
             buildSubTree(R, parents, R[i, j], R[i, j] + 1, j)
 
 
-# pp.pprint(findBestTree(words, alpha, beta))
+# TODO: remove
 
-P, R, W = findBestRoots(alpha, beta)
-print('final R and P')
-pp.pprint(R)
-pp.pprint(P)
-input()
-# pp.pprint(parentsFromRoots(np.array([[0, -1, 1], [-1, -1, -1], [-1, -1, 2]])))
-pp.pprint(parentsFromRoots(R))
+pp = pprint.PrettyPrinter(indent=4)
+
+alpha = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+beta = [0, 10, 0, 0, 100, 0, 0, 0, 10, 0]
+n = len(beta)
+
+tree = main(beta, alpha)
+pp.pprint(tree)
