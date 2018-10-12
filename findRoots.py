@@ -40,6 +40,7 @@ def computeWeight(alpha, beta):
     :param alpha: list of the weight of the alpha parameters
     :param beta: list of the weight of the beta parameters
     """
+    n = len(beta)
     W = np.zeros((n, n))
     # Initialise with values for a single node
     for i in range(n):
@@ -59,6 +60,7 @@ def findBestRoots(alpha, beta):
     :return R: The roots matrix, containing for R[i, j] the index of the root of the optimal
                 subtree built from the words A_i, A_i+1 ... A_j
     """
+    n = len(beta)
     # Pre compute all the sums
     W = computeWeight(alpha, beta)
 
