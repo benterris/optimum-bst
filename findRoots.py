@@ -136,15 +136,3 @@ def buildSubTree(R, parents, calledFrom, i, j):
         if R[i, j] + 1 <= j:
             # In case we indeed have a right subtree
             buildSubTree(R, parents, R[i, j], R[i, j] + 1, j)
-
-
-# TODO: remove
-
-pp = pprint.PrettyPrinter(indent=4)
-
-alpha = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-beta = [0, 10, 0, 0, 100, 0, 0, 0, 10, 0]
-n = len(beta)
-
-tree = main(beta, alpha)
-pp.pprint(tree)
