@@ -1,0 +1,97 @@
+% This is samplepaper.tex, a sample chapter demonstrating the
+% LLNCS macro package for Springer Computer Science proceedings;
+% Version 2.20 of 2017/10/04
+%
+\documentclass{article}
+%
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage[utf8]{inputenc}
+% Used for displaying a sample figure. If possible, figure files should
+% be included in EPS format.
+%
+% If you use the hyperref package, please uncomment the following line
+% to display URLs in blue roman font according to Springer's eBook style:
+% \renewcommand\UrlFont{\color{blue}\rmfamily}
+
+\begin{document}
+%
+\title{DM d'algorithmique}
+
+%
+\maketitle              % typeset the header of the contribution
+
+%
+%
+%
+\section{Question 1.2}
+\subsection{Pseudo code}
+
+\begin{verbatim}
+function optimum_tree (alpha, beta):
+
+    let R # the roots
+    let P # the weighted paths
+    let W # the summed weights
+    let n = size(alpha)
+
+    # Initialise values
+    for i in 0..n:
+        W[i, i] = P[i, i] = alpha[i] # summed paths and weights initialisation
+        R[i, i] = i
+    
+    # Pre compute W
+    for i in 0..n:
+        for j in i+1..n:
+            W[i, j] = W[i, j-1] + beta[j] + alpha[j]
+    
+    # Build R and P
+    for subtreeLen in 2..n-1:
+        # We build all the possible optimal trees of length subtreeLen
+        for i in 0..n-subtreeLen:
+            j = i + subtreeLen
+
+            # find the best root for the subtree i..j
+            # according to the article, we don't have to check all 
+            # the values from i to j but only a subset:
+            for k in R[i, j-1]..R[i+1, j]:
+                currentWeight = P[i, k+1] + P[k+1, j] + W[i, j]
+                # Then update the current values of R and P if we have a better value
+                update_min_weight_and_min_root(R, k, P, currentWeight)
+    
+    return R
+\end{verbatim}
+
+\subsection{Preuve d'optimalité} 
+
+L'algorithme consiste en la construction de l'arbre en respectant la contrainte :
+\begin{equation}
+    P_{ij} = \underset{R_{i,j-1}<k\leq R_{i+1,j}}{min}(P_{i,k - 1} + P_{k,j}) + W_{ij}
+\end{equation}
+Où $P$, $R$ et $W$ représentent :
+\begin{itemize}
+ \item $P_{mn}$ le poids du sous-arbre optimal consituté des noeuds $A_m...A_n$
+\item $R_{mn}$ l'indice de sa racine 
+\item $W_{mn}$ la somme $\alpha_m, \beta_{m+1}, \alpha_{m+1}, ... , \alpha_{n}$
+\end{itemize}
+
+
+Montrons la construction d'un arbre respectant pour tout intervalle $A_i, A_{i+1} ... A{j}$ la contrainte (1) produit un arbre optimal.
+ 
+Tout d'abord :  
+Si un arbre de noeuds $A_i...A_j$ de racine $k$ avec $i<k\leq j$ est optimal, alors des sous-arbres droit et gauche de cet arbre, constitués respectivement des noeuds $A_i...A_{k-1}$ et $A_{k+1}...A_j$ sont optimaux.  
+En effet dans le cas contraire, si un des sous-arbres est sous-optimal, en choisissant à sa place un sous-arbre optimal, on améliore le poids de l'arbre $A_i...A_j$ qui ne serait donc pas optimal.  
+
+On en déduit que pour construire un arbre optimal, il suffit de choisir sa racine telle que le poids de l'arbre complet constitué du sous-arbre optimal à gauche de la racine, et du sous-arbre optimal à droite, soit minimal, autrement dit, trouver $R_{ij}$ tel que : 
+
+\begin{equation}
+P_{i,R_{ij} - 1} + P_{R_{ij},j} = \underset{i<k\leq j}{min}(P_{i,k - 1} + P_{k,j})
+\end{equation}
+
+D'autre part, d'après le corollaire de l'article, on sait qu'il existe une telle racine $R_{ij}$ respectant la condition $R_{i,j-1} \leq R_{ij} \leq R_{i+1, j}$. On en déduit qu'il suffit de chercher la racine seulement dans cet intervalle, à savoir trouver $R_{ij}$ tel que : 
+
+\begin{equation}
+P_{i,R_{ij} - 1} + P_{R_{ij},j} = \underset{R_{i,j-1} \leq k \leq R_{i+1, j}}{min}(P_{i,k - 1} + P_{k,j})
+\end{equation}
+On en déduit que la procédure induite par (1) permet bien de construire un arbre optimal.
+\end{document}
